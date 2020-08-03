@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Typography, Button, Form, message, Input, Icon } from "antd";
+import FileUpload from "../../utils/FileUpload";
+import Axios from "axios";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -14,11 +16,12 @@ const Continents = [
   { key: 7, value: "Antarctica" },
 ];
 
-function UploadProductPage() {
+function UploadProductPage(props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [prices, setPrices] = useState(0);
   const [select, setSelect] = useState(1);
+  const [images, setImages] = useState([]);
 
   const onTitleChange = (event) => {
     setTitle(event.currentTarget.value);
@@ -29,18 +32,45 @@ function UploadProductPage() {
   const onPriceChange = (event) => {
     setPrices(event.currentTarget.value);
   };
-  const onContinentselectChange = (event) => {
+  const onContinentSelectChange = (event) => {
     setSelect(event.currentTarget.value);
+  };
+  const updateImages = (newImages) => {
+    console.log(newImages);
+    setImages(newImages);
+  };
+  const onSubmit = (event) => {
+    event.preventDefault();
+
+    const variables = {
+      writer: props.user.userData._id,
+      title,
+      description,
+      price: prices,
+      image: images,
+      continents: select,
+    };
+
+    Axios.post("/api/product/uploadProduct", variables).then((response) => {
+      if (response.data.success) {
+        alert("Product successfully Uploaded");
+        props.history.push("/");
+      } else {
+        alert("Failed to upload Product");
+      }
+    });
   };
 
   return (
     <div style={{ maxWidth: "700px", margin: "2rem auto" }}>
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <Title level={1}>Upload Travel Product</Title>
+        <Title level={2}>Upload Travel Product</Title>
       </div>
       {/**Form*/}
-      <Form onSubmit>
+      <Form onSubmit={onSubmit}>
         {/**Drop zone*/}
+        <FileUpload refreshFunction={updateImages} />
+
         <br />
         <br />
         <label>Title</label>
@@ -53,7 +83,7 @@ function UploadProductPage() {
         <br />
         <label>Price($)</label>
         <Input onChange={onPriceChange} value={prices} type="number" />
-        <select onChange={onContinentselectChange}>
+        <select onChange={onContinentSelectChange}>
           {Continents.map((item) => (
             <option key={item.key} value={item.key}>
               {item.value}
@@ -62,7 +92,7 @@ function UploadProductPage() {
         </select>
         <br />
         <br />
-        <Button onClick>Submit</Button>
+        <Button onClick={onSubmit}>Submit</Button>
       </Form>
     </div>
   );
