@@ -42,12 +42,16 @@ function UploadProductPage(props) {
   const onSubmit = (event) => {
     event.preventDefault();
 
+    if (!title || !description || !prices || !select || !images) {
+      return alert("Fill all the fields first!");
+    }
+
     const variables = {
       writer: props.user.userData._id,
       title,
       description,
       price: prices,
-      image: images,
+      images: images,
       continents: select,
     };
 
