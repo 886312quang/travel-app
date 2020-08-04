@@ -2,14 +2,21 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import { Icon, Row, Col, Card } from "antd";
 import ImageSlider from "../../utils/ImageSlider";
+import CheckBox from "./Sections/CheckBox";
+import RadioBox from "./Sections/RadioBox";
+import { continents, price } from "./Sections/Datas";
 
 const { Meta } = Card;
 
 function LandingPage() {
   const [products, setProducts] = useState([]);
   const [skip, setSkip] = useState(0);
-  const [limit, setLimit] = useState(1);
+  const [limit, setLimit] = useState(8);
   const [postSize, setPostSize] = useState(0);
+  const [Filters, setFilters] = useState({
+    continents: [],
+    price: [],
+  });
 
   useEffect(() => {
     const variables = {
@@ -23,7 +30,11 @@ function LandingPage() {
   const getProducts = (variables) => {
     Axios.post("/api/product/getProducts", variables).then((response) => {
       if (response.data.success) {
-        setProducts([...products, ...response.data.products]);
+        if (variables.loadMore) {
+          setProducts([...products, ...response.data.products]);
+        } else {
+          setProducts(response.data.products);
+        }
         setPostSize(response.data.postSize);
       } else {
         alert("Failed to get product data");
@@ -37,6 +48,7 @@ function LandingPage() {
     const variables = {
       skip: skp,
       limit,
+      loadMore: true,
     };
 
     getProducts(variables);
@@ -53,6 +65,41 @@ function LandingPage() {
     );
   });
 
+  const showFiltersResults = (filters) => {
+    const variables = {
+      skip: 0,
+      limit,
+      filters,
+    };
+
+    getProducts(variables);
+    setSkip(0);
+  };
+
+  const handlePrice = (value) => {
+    const data = price;
+    let array = [];
+    for (let key in data) {
+      if (data[key]._id === parseInt(value, 10)) {
+        array = data[key].array;
+      }
+    }
+    return array;
+  };
+
+  const handleFilters = (filters, category) => {
+    const newFilters = { ...Filters };
+    newFilters[category] = filters;
+
+    if (category === "price") {
+      let priceValues = handlePrice(filters);
+      newFilters[category] = priceValues;
+    }
+
+    showFiltersResults(newFilters);
+    setFilters(newFilters);
+  };
+
   return (
     <>
       <div style={{ width: "75%", margin: "3rem auto" }}>
@@ -61,8 +108,27 @@ function LandingPage() {
             Let's Travel Any Where <Icon type="rocket"></Icon>
           </h2>
         </div>
+        <br />
+        <br />
         {/*Filter*/}
+        <Row gutter={[16, 16]}>
+          <Col lg={12} xs={24}>
+            <CheckBox
+              list={continents}
+              handleFilters={(filters) => handleFilters(filters, "continents")}
+            />
+          </Col>
+          <Col lg={12} xs={24}>
+            <RadioBox
+              list={price}
+              handleFilters={(filters) => handleFilters(filters, "price")}
+            />
+          </Col>
+        </Row>
         {/*Search */}
+
+        <br />
+        <br />
         {products.length === 0 ? (
           <div
             style={{
