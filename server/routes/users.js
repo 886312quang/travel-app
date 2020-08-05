@@ -164,11 +164,12 @@ router.post("/SCB", auth, (req, res) => {
 
   // 1. Put brief Payment Information inside User collections
   req.body.cartDetail.forEach((item) => {
+    let price = item.price * item.quantity;
     history.push({
       dateOfPurchase: Date.now(),
       name: item.title,
       id: item._id,
-      price: item.price,
+      price: price,
       quantity: item.quantity,
       paymentId: req.body.paymentData.paymentID,
     });
@@ -228,6 +229,14 @@ router.post("/SCB", auth, (req, res) => {
       });
     },
   );
+});
+
+router.get("/history", auth, (req, res) => {
+  User.findOne({ _id: req.user._id }, (err, doc) => {
+    let history = doc.history;
+    if (err) return res.status(400).send(err);
+    return res.status(200).json({ success: true, history });
+  });
 });
 
 module.exports = router;
