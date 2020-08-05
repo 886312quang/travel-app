@@ -1,5 +1,13 @@
 import axios from "axios";
-import { LOGIN_USER, REGISTER_USER, AUTH_USER, LOGOUT_USER,ADD_TO_CART_USER } from "./types";
+import {
+  LOGIN_USER,
+  REGISTER_USER,
+  AUTH_USER,
+  LOGOUT_USER,
+  ADD_TO_CART_USER,
+  GET_CART_ITEM_USER,
+  REMOVE_CART_ITEM_USER,
+} from "./types";
 import { USER_SERVER } from "../components/Config.js";
 
 export function registerUser(dataToSubmit) {
@@ -53,6 +61,49 @@ export function addToCart(_id) {
 
   return {
     type: ADD_TO_CART_USER,
+    payload: request,
+  };
+}
+
+export function getCartItems(cartItems, userCart) {
+  const request = axios
+    .get(`/api/product/product_by_id?id=${cartItems}&type=array`)
+    .then((response) => {
+      // Make CartDetail Redux Store
+      // We need add quantity data to Product Information that come from Product Collection
+      userCart.forEach((cartItem) => {
+        response.data.forEach((productDetail, i) => {
+          if (cartItem.id === productDetail._id) {
+            response.data[i].quantity = cartItem.quantity;
+          }
+        });
+      });
+      return response.data;
+    });
+
+  return {
+    type: GET_CART_ITEM_USER,
+    payload: request,
+  };
+}
+
+export function removeCartItem(id) {
+  const request = axios
+    .get(`/api/users/removeFromCart?_id=${id}`)
+    .then((response) => {
+      response.data.cart.forEach((item) => {
+        response.data.cartDetail.forEach((c, i) => {
+          if (item.id === c._id) {
+            response.data.cartDetail[i].quantity = item.quantity;
+          }
+        });
+      });
+
+      return response.data;
+    });
+
+  return {
+    type: REMOVE_CART_ITEM_USER,
     payload: request,
   };
 }
