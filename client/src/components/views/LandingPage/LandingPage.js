@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import { Icon, Row, Col, Card } from "antd";
 import ImageSlider from "../../utils/ImageSlider";
@@ -20,6 +20,8 @@ function LandingPage() {
     price: [],
   });
 
+  const typingTimeOutRef = useRef(null);
+
   useEffect(() => {
     const variables = {
       skip,
@@ -31,6 +33,7 @@ function LandingPage() {
 
   const getProducts = (variables) => {
     Axios.post("/api/product/getProducts", variables).then((response) => {
+      console.log("goi api");
       if (response.data.success) {
         if (variables.loadMore) {
           setProducts([...products, ...response.data.products]);
@@ -110,17 +113,26 @@ function LandingPage() {
   };
 
   const updateSearchTerms = (newSearch) => {
-    const variables = {
-      skip: 0,
-      limit,
-      filters: Filters,
-      searchTerm: newSearch,
-    };
+    const value = newSearch;
+    setSearchTerms(value);
 
-    setSkip(0);
-    setSearchTerms(newSearch);
+    if (!getProducts) return;
 
-    getProducts(variables);
+    if (typingTimeOutRef.current) {
+      clearTimeout(typingTimeOutRef.current);
+    }
+
+    typingTimeOutRef.current = setTimeout(() => {
+      const variables = {
+        skip: 0,
+        limit,
+        filters: Filters,
+        searchTerm: value,
+      };
+
+      setSkip(0);
+      getProducts(variables);
+    }, 800);
   };
 
   return (
