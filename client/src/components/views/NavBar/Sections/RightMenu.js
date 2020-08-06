@@ -34,7 +34,10 @@ function RightMenu(props) {
     return (
       <Menu mode={props.mode}>
         <Menu.Item key="cart">
-          <Badge count={1} style={{ marginRight: 22 }}>
+          <Badge
+            count={user.userData && user.userData.cart.length}
+            style={{ marginRight: 22 }}
+          >
             <a href="/user/cart" style={{ color: "#667777" }}>
               <Icon
                 type="shopping-cart"
