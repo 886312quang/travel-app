@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { loginUser } from "../../../_actions/user_actions";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -152,13 +152,13 @@ function LoginPage(props) {
                 >
                   Remember me
                 </Checkbox>
-                <a
+                <Link
                   className="login-form-forgot"
-                  href="/reset_user"
+                  to="/reset_user"
                   style={{ float: "right" }}
                 >
                   forgot password
-                </a>
+                </Link>
                 <div>
                   <Button
                     type="primary"
@@ -171,7 +171,7 @@ function LoginPage(props) {
                     Log in
                   </Button>
                 </div>
-                Or <a href="/register">register now!</a>
+                Or <Link to="/register">register now!</Link>
               </Form.Item>
             </form>
           </div>
